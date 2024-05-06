@@ -1,22 +1,29 @@
-% Solve the problem with an additional list to track visited states
-solve(State, Moves) :-
-    solve(State, [], Moves).
+% Main function to start solving with an initial state
+solve(InitialState, Moves) :-
+    find_solution(InitialState, [], Moves).
 
-solve(state(_, _, true), _, []).
-solve(State, Visited, [Move | Moves]) :-
-    move_action(State, Move, NewState),
-    \+ memberchk(NewState, Visited), 
-    solve(NewState, [NewState | Visited], Moves).
+% Base case: If the monkey is on the box (goal state), no further moves are needed.
+find_solution(state(_, _, true), _, []).
 
-% Define the move_action as before
-move_action(State, move(MonkeyPosition, NewPosition), NewState) :-
-    move(MonkeyPosition, NewPosition, State, NewState).
-move_action(State, push(BoxPosition, NewPosition), NewState) :-
-    push(BoxPosition, NewPosition, State, NewState).
-move_action(State, climb, NewState) :-
-    climb(State, NewState).
+% Recursive case: Find a valid move that leads to a new state, ensuring its not visited already
+find_solution(CurrentState, Visited, [Move | Moves]) :-
+    valid_move(CurrentState, Move, NewState),
+    \+ memberchk(NewState, Visited),
+    find_solution(NewState, [NewState | Visited], Moves).
 
-% Now, define your moves and states precisely
-move(at_door, at_window, state(at_door, at_window, false), state(at_window, at_window, false)).
-push(at_window, at_centre, state(at_window, at_window, false), state(at_centre, at_centre, false)).
-climb(state(at_centre, at_centre, false), state(at_centre, at_centre, true)).
+% Rules for valid moves and resulting states
+valid_move(state(Monkey, Box, false), move(Monkey, NewPosition), state(NewPosition, Box, false)) :-
+    move(Monkey, NewPosition).
+
+valid_move(state(Monkey, Box, false), push(Box, NewPosition), state(NewPosition, NewPosition, false)) :-
+    push(Box, NewPosition),
+    Monkey = Box.
+
+valid_move(state(Position, Position, false), climb, state(Position, Position, true)).
+
+% Move actions that are valid (defined as simple facts)
+move(at_door, at_window).
+move(at_window, at_centre).
+
+% Push actions where the box can be pushed from one position to another
+push(at_window, at_centre).
