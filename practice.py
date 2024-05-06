@@ -1,23 +1,29 @@
-from collections import deque
-def bfs(graph, start):
-    visited = set()
-    queue = deque([start])
+import random
 
-    while queue:
-        vertex = queue.popleft()
-        if vertex not in visited:
-            print(vertex, end = ' ')
-            queue.extend(n for n in graph[vertex] if n not in visited)
+def hangman():
+    words = ["soham", "elephannt"]
+    word = random.choice(words)
+    guessed = '_' * len(word)
+    guessed = list(guessed)
+    word = list(word)
+    attempts = 6
 
-# Example usage:
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': [],
-    'E': ['F'],
-    'F': []
-}
+    while attempts > 0:
+        print(' '.join(guessed))
+        guess = input("Take a guess: ").lower()
+        
+        if guess in word:
+            for index, letter in enumerate(word):
+                if letter == guess:
+                    guessed[index] = guess
+                    print("Correct Guess")
+            if '_' not in guessed:
+                print("Won")
+                print(f"Word was {word}")
+        else:
+            attempts -= 1
+            print(f"Wrong Guess {attempts} attempts left")
+        if attempts == 0:
+            print("Lost:")
 
-start_node = 'A'
-bfs(graph, start_node)
+hangman()
